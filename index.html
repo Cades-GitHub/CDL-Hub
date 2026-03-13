@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDL HUB — Call of Duty League</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0c;
+    --surface: #111116;
+    --surface2: #18181f;
+    --border: #2a2a3a;
+    --accent: #ff3c00;
+    --accent2: #ffb800;
+    --text: #e8e8f0;
+    --muted: #6a6a80;
+    --green: #00e87a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.3;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 60px;
+    background: rgba(10,10,12,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 1.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .nav-logo span { color: var(--accent); }
+
+  .nav-tabs {
+    display: flex;
+    gap: 0;
+    list-style: none;
+  }
+
+  .nav-tabs li button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0 1.25rem;
+    height: 60px;
+    cursor: pointer;
+    transition: color 0.2s, border-bottom 0.2s;
+    border-bottom: 3px solid transparent;
+    margin-top: 3px;
+  }
+
+  .nav-tabs li button:hover { color: var(--text); }
+  .nav-tabs li button.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .nav-live {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--green);
+  }
+
+  .live-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 1.8s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* PAGES */
+  .page { display: none; padding-top: 60px; min-height: 100vh; }
+  .page.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* HERO BANNER */
+  .hero {
+    position: relative;
+    height: 220px;
+    background: linear-gradient(135deg, #0a0a0c 0%, #1a0800 50%, #0a0a0c 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 60px,
+      rgba(255,60,0,0.03) 60px,
+      rgba(255,60,0,0.03) 61px
+    );
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 80px;
+    background: radial-gradient(ellipse, rgba(255,60,0,0.25) 0%, transparent 70%);
+    filter: blur(20px);
+  }
+
+  .hero-content {
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 4rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    line-height: 0.9;
+    color: var(--text);
+  }
+
+  .hero-title em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .hero-sub {
+    margin-top: 0.75rem;
+    color: var(--muted);
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* SECTION */
+  .section {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 2rem 2rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 14px;
+    background: var(--accent);
+  }
+
+  .tag {
+    background: rgba(255,60,0,0.12);
+    border: 1px solid rgba(255,60,0,0.25);
+    color: var(--accent);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 2px;
+  }
+
+  /* VIDEO GRID */
+  .video-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .video-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+    position: relative;
+  }
+
+  .video-card:hover {
+    border-color: rgba(255,60,0,0.5);
+    transform: translateY(-2px);
+  }
+
+  .video-thumb {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: var(--surface2);
+    overflow: hidden;
+  }
+
+  .video-thumb iframe {
+    width: 100%; height: 100%;
+    border: none;
+    pointer-events: none;
+  }
+
+  .video-thumb-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .video-card:hover .video-thumb-overlay { opacity: 1; }
+
+  .play-btn {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 30px rgba(255,60,0,0.5);
+  }
+
+  .play-btn svg { fill: white; margin-left: 3px; }
+
+  .video-meta {
+    padding: 0.875rem 1rem;
+  }
+
+  .video-team-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .team-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+
+  .team-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .video-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 0.5rem;
+  }
+
+  .video-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .video-views { display: flex; align-items: center; gap: 0.3rem; }
+
+  /* VIDEO MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 500;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    width: 100%;
+    max-width: 880px;
+    overflow: hidden;
+  }
+
+  .modal-video {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: #000;
+  }
+
+  .modal-video iframe { width: 100%; height: 100%; border: none; }
+
+  .modal-info {
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .modal-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.4rem;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .modal-close {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    width: 32px; height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* FORUM PAGE */
+  .forum-layout {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  /* POST COMPOSER */
+  .composer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .composer-header {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .composer-header::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 12px;
+    background: var(--accent);
+  }
+
+  .composer-row { display: flex; gap: 0.75rem; margin-bottom: 0.75rem; }
+
+  .composer input[type="text"],
+  .composer textarea,
+  .composer select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.9rem;
+    padding: 0.6rem 0.9rem;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .composer input:focus,
+  .composer textarea:focus,
+  .composer select:focus {
+    border-color: rgba(255,60,0,0.5);
+  }
+
+  .composer textarea {
+    resize: vertical;
+    min-height: 90px;
+    margin-bottom: 0.75rem;
+  }
+
+  .composer select { width: auto; flex-shrink: 0; }
+
+  .composer input::placeholder,
+  .composer textarea::placeholder { color: var(--muted); }
+
+  .btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.55rem 1.25rem;
+    border-radius: 4px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.15s;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: #ff5c26; }
+
+  .btn-ghost {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* POSTS */
+  .post {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.15s;
+    animation: fadeIn 0.35s ease;
+  }
+
+  .post:hover { border-color: rgba(255,60,0,0.3); }
+
+  .post-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .post-author {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 900;
+    font-size: 0.85rem;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .author-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+    color: var(--text);
+  }
+
+  .post-time {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .post-flair {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .post-body {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+
+  .post-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .post-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .post-action {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: color 0.15s;
+    padding: 0;
+  }
+
+  .post-action:hover { color: var(--accent); }
+  .post-action.liked { color: var(--accent); }
+
+  /* REPLIES */
+  .replies {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    display: none;
+  }
+
+  .replies.open { display: block; }
+
+  .reply {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding-left: 0.5rem;
+    border-left: 2px solid var(--border);
+    animation: fadeIn 0.2s ease;
+  }
+
+  .reply-content { flex: 1; }
+  .reply-author {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--text);
+    margin-bottom: 0.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .reply-text {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .reply-input-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+  }
+
+  .reply-input-row input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .reply-input-row input:focus { border-color: rgba(255,60,0,0.5); }
+  .reply-input-row input::placeholder { color: var(--muted); }
+
+  /* SIDEBAR */
+  .sidebar { }
+
+  .sidebar-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .sidebar-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .sidebar-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px; height: 12px;
+    background: var(--accent);
+  }
+
+  .team-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .team-row:last-child { border-bottom: none; }
+
+  .team-dot-lg {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .team-row-name {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .team-row-count {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .rule-item {
+    font-size: 0.82rem;
+    color: var(--muted);
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .rule-item:last-child { border-bottom: none; }
+  .rule-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 1.2rem;
+  }
+
+  /* FILTER BAR */
+  .filter-bar {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+  }
+
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active { background: rgba(255,60,0,0.12); border-color: var(--accent); color: var(--accent); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    .forum-layout { grid-template-columns: 1fr; }
+    .sidebar { order: -1; }
+    .video-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 2.8rem; }
+    .composer-row { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">CDL<span>HUB</span></div>
+  <ul class="nav-tabs">
+    <li><button class="active" onclick="showPage('videos', this)">Videos</button></li>
+    <li><button onclick="showPage('forum', this)">Forum</button></li>
+  </ul>
+  <div class="nav-live"><div class="live-dot"></div>Season Live</div>
+</nav>
+
+<!-- VIDEOS PAGE -->
+<div id="page-videos" class="page active">
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-eyebrow">Call of Duty League</div>
+      <div class="hero-title">CDL <em>Hub</em></div>
+      <div class="hero-sub">Latest highlights, match recaps & big plays</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Featured Videos <span class="tag">Updated Daily</span></div>
+    </div>
+
+    <div class="filter-bar" id="videoFilter">
+      <button class="filter-btn active" onclick="filterVideos('all', this)">All</button>
+      <button class="filter-btn" onclick="filterVideos('highlight', this)">Highlights</button>
+      <button class="filter-btn" onclick="filterVideos('recap', this)">Match Recaps</button>
+      <button class="filter-btn" onclick="filterVideos('analysis', this)">Analysis</button>
+      <button class="filter-btn" onclick="filterVideos('interview', this)">Interviews</button>
+    </div>
+
+    <div class="video-grid" id="videoGrid"></div>
+  </div>
+</div>
+
+<!-- FORUM PAGE -->
+<div id="page-forum" class="page">
+  <div class="hero">
+    <div class="hero-content">
+      <div class="hero-eyebrow">Community</div>
+      <div class="hero-title">The <em>Drop</em></div>
+      <div class="hero-sub">Talk CDL. Debate. React. Connect.</div>
+    </div>
+  </div>
+
+  <div class="forum-layout">
+    <!-- MAIN FEED -->
+    <div>
+      <!-- COMPOSER -->
+      <div class="composer">
+        <div class="composer-header">New Post</div>
+        <input type="text" id="postUsername" placeholder="Your name / gamertag" style="margin-bottom:0.75rem">
+        <input type="text" id="postTitle" placeholder="Post title..." style="margin-bottom:0.75rem">
+        <div class="composer-row">
+          <select id="postFlair">
+            <option value="Discussion">💬 Discussion</option>
+            <option value="Hot Take">🔥 Hot Take</option>
+            <option value="Highlight">🎮 Highlight</option>
+            <option value="Analysis">📊 Analysis</option>
+            <option value="Question">❓ Question</option>
+            <option value="Meme">😂 Meme</option>
+          </select>
+        </div>
+        <textarea id="postBody" placeholder="What's on your mind? Talk CDL..."></textarea>
+        <button class="btn btn-primary" onclick="submitPost()">Post It</button>
+      </div>
+
+      <!-- FILTER -->
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterPosts('all', this)">All Posts</button>
+        <button class="filter-btn" onclick="filterPosts('Hot Take', this)">🔥 Hot Takes</button>
+        <button class="filter-btn" onclick="filterPosts('Discussion', this)">💬 Discussion</button>
+        <button class="filter-btn" onclick="filterPosts('Analysis', this)">📊 Analysis</button>
+      </div>
+
+      <div id="postFeed"></div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-card">
+        <div class="sidebar-title">CDL Teams 2025</div>
+        <div id="teamsList"></div>
+      </div>
+      <div class="sidebar-card">
+        <div class="sidebar-title">Community Rules</div>
+        <div class="rule-item"><span class="rule-num">1</span>Keep it about CDL & CoD</div>
+        <div class="rule-item"><span class="rule-num">2</span>No personal attacks</div>
+        <div class="rule-item"><span class="rule-num">3</span>Tag spoilers in the title</div>
+        <div class="rule-item"><span class="rule-num">4</span>Source your clips/stats</div>
+        <div class="rule-item"><span class="rule-num">5</span>Trash talk = fair game (be cool)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIDEO MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-video">
+      <iframe id="modalIframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    </div>
+    <div class="modal-info">
+      <div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="post-time" id="modalMeta" style="margin-top:0.3rem"></div>
+      </div>
+      <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────
+const TEAMS = [
+  { name: "Atlanta FaZe", color: "#C8102E", posts: 142 },
+  { name: "Boston Breach", color: "#006847", posts: 98 },
+  { name: "Carolina Royal Ravens", color: "#7B2FBE", posts: 76 },
+  { name: "Las Vegas Legion", color: "#C69214", posts: 89 },
+  { name: "Los Angeles Guerrillas", color: "#FF6600", posts: 115 },
+  { name: "Los Angeles Thieves", color: "#EF3340", posts: 201 },
+  { name: "Minnesota RØKKR", color: "#582C83", posts: 64 },
+  { name: "New York Subliners", color: "#171C8F", posts: 88 },
+  { name: "OpTic Texas", color: "#92C83E", posts: 234 },
+  { name: "Seattle Surge", color: "#E63946", posts: 55 },
+  { name: "Toronto Ultra", color: "#00ADEF", posts: 72 },
+  { name: "Miami Heretics", color: "#FF3131", posts: 49 },
+];
+
+const VIDEOS = [
+  { id: "dQw4w9WgXcQ", title: "OpTic Texas vs Atlanta FaZe — Game 5 Hardpoint HYPE", team: "OpTic Texas", teamColor: "#92C83E", views: "241K", time: "2h ago", type: "recap" },
+  { id: "9bZkp7q19f0", title: "aBeZy Goes NUCLEAR — 40 Kills Slayer Performance", team: "Atlanta FaZe", teamColor: "#C8102E", views: "876K", time: "5h ago", type: "highlight" },
+  { id: "JGwWNGJdvx8", title: "CDL Breakdown: Why Search & Destroy Meta Changed Everything", team: "CDL Official", teamColor: "#ff3c00", views: "132K", time: "1d ago", type: "analysis" },
+  { id: "kJQP7kiw5Fk", title: "Shotzzy's Reaction After Clutch Round Win vs Subliners", team: "OpTic Texas", teamColor: "#92C83E", views: "97K", time: "1d ago", type: "interview" },
+  { id: "fJ9rUzIMcZQ", title: "LA Thieves Major III — All 5 Hardpoint Highlights", team: "LA Thieves", teamColor: "#EF3340", views: "308K", time: "2d ago", type: "highlight" },
+  { id: "CevxZvSJLk8", title: "Vegas Legion Season Comeback Arc — Mini-Doc", team: "Las Vegas Legion", teamColor: "#C69214", views: "189K", time: "3d ago", type: "recap" },
+  { id: "tgbNymZ7vqY", title: "Boston Breach vs Carolina — Full Control Series VOD", team: "Boston Breach", teamColor: "#006847", views: "56K", time: "4d ago", type: "recap" },
+  { id: "pRpeEdMmmQ0", title: "Pred Explains His AR Build Strategy (Pre-Patch)", team: "CDL Analysis", teamColor: "#ff3c00", views: "203K", time: "5d ago", type: "analysis" },
+  { id: "7PCkvCPvDXk", title: "Toronto Ultra vs OpTic — MUST SEE Final Round", team: "Toronto Ultra", teamColor: "#00ADEF", views: "411K", time: "6d ago", type: "highlight" },
+];
+
+const AVATAR_COLORS = ["#ff3c00","#ffb800","#00e87a","#00b4ff","#b45cff","#ff6b6b","#4ecdc4","#ff9f43","#a29bfe","#fd79a8"];
+
+let posts = [
+  { id: 1, username: "TexasRifle", title: "OpTic is built different this season", body: "The way Shotzzy has been playing mid-map control is actually insane. Their communication looks way tighter than last year. Major IV is theirs, calling it now.", flair: "Hot Take", likes: 87, liked: false, time: "3h ago", replies: [
+    { username: "FaZeUp2025", text: "Shotzzy good but aBeZy wins us every S&D. AtlFaZe in the grand finals, trust.", time: "2h ago" },
+    { username: "CDLwatcher", text: "The mid-map thing is real, their rotations are clean now", time: "1h ago" },
+  ]},
+  { id: 2, username: "SlayerNate", title: "Unpopular opinion: Control needs reworked", body: "I watch every match and Control slows down the stream every time. HP + S&D finals would be way more hype. Fight me.", flair: "Discussion", likes: 34, liked: false, time: "5h ago", replies: [] },
+  { id: 3, username: "clutchQueen", title: "Abezy clip from today is crazy", body: "Did anyone else catch the clip where he 1v3'd the full optic squad in S&D round 11? That's a top 5 CDL moment this year easy.", flair: "Highlight", likes: 155, liked: false, time: "8h ago", replies: [
+    { username: "ProScout", text: "Clip is nuts, that strafe into the pillar then swaps to pistol was built different", time: "6h ago" },
+  ]},
+];
+let nextPostId = 4;
+let currentFilter = 'all';
+let videoFilter = 'all';
+
+// ─── RENDER ─────────────────────────────────────────────────────────
+function renderVideos() {
+  const grid = document.getElementById('videoGrid');
+  const filtered = videoFilter === 'all' ? VIDEOS : VIDEOS.filter(v => v.type === videoFilter);
+  grid.innerHTML = filtered.map(v => `
+    <div class="video-card" onclick="openVideo('${v.id}','${encodeURIComponent(v.title)}','${v.team}','${v.views}','${v.time}')">
+      <div class="video-thumb">
+        <img src="https://img.youtube.com/vi/${v.id}/hqdefault.jpg" alt="${v.title}" style="width:100%;height:100%;object-fit:cover;display:block;">
+        <div class="video-thumb-overlay">
+          <div class="play-btn">
+            <svg width="18" height="18" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="video-meta">
+        <div class="video-team-badge">
+          <span class="team-dot" style="background:${v.teamColor}"></span>
+          <span class="team-name">${v.team}</span>
+        </div>
+        <div class="video-title">${v.title}</div>
+        <div class="video-footer">
+          <span class="video-views">▶ ${v.views} views</span>
+          <span>${v.time}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderPosts() {
+  const feed = document.getElementById('postFeed');
+  const filtered = currentFilter === 'all' ? posts : posts.filter(p => p.flair === currentFilter);
+  feed.innerHTML = [...filtered].reverse().map(p => renderPost(p)).join('');
+}
+
+function renderPost(p) {
+  const colorIdx = p.username.charCodeAt(0) % AVATAR_COLORS.length;
+  const avatarBg = AVATAR_COLORS[colorIdx];
+  const flairColors = {
+    'Discussion': { bg: 'rgba(0,180,255,0.12)', color: '#00b4ff', border: 'rgba(0,180,255,0.3)' },
+    'Hot Take': { bg: 'rgba(255,60,0,0.12)', color: '#ff3c00', border: 'rgba(255,60,0,0.3)' },
+    'Highlight': { bg: 'rgba(0,232,122,0.12)', color: '#00e87a', border: 'rgba(0,232,122,0.3)' },
+    'Analysis': { bg: 'rgba(180,92,255,0.12)', color: '#b45cff', border: 'rgba(180,92,255,0.3)' },
+    'Question': { bg: 'rgba(255,184,0,0.12)', color: '#ffb800', border: 'rgba(255,184,0,0.3)' },
+    'Meme': { bg: 'rgba(255,107,107,0.12)', color: '#ff6b6b', border: 'rgba(255,107,107,0.3)' },
+  };
+  const fc = flairColors[p.flair] || flairColors['Discussion'];
+  const repliesHtml = p.replies.map(r => {
+    const ri = r.username.charCodeAt(0) % AVATAR_COLORS.length;
+    return `
+      <div class="reply">
+        <div class="avatar" style="background:${AVATAR_COLORS[ri]};width:26px;height:26px;font-size:0.72rem">${r.username[0].toUpperCase()}</div>
+        <div class="reply-content">
+          <div class="reply-author">${r.username} <span style="font-weight:300;color:var(--muted);font-size:0.72rem">${r.time}</span></div>
+          <div class="reply-text">${r.text}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="post" id="post-${p.id}">
+      <div class="post-header">
+        <div class="post-author">
+          <div class="avatar" style="background:${avatarBg}">${p.username[0].toUpperCase()}</div>
+          <div>
+            <div class="author-name">${p.username}</div>
+            <div class="post-time">${p.time}</div>
+          </div>
+        </div>
+        <span class="post-flair" style="background:${fc.bg};color:${fc.color};border:1px solid ${fc.border}">${p.flair}</span>
+      </div>
+      <div class="post-title">${p.title}</div>
+      <div class="post-body">${p.body}</div>
+      <div class="post-footer">
+        <button class="post-action ${p.liked ? 'liked' : ''}" onclick="likePost(${p.id})">
+          ♥ <span id="likes-${p.id}">${p.likes}</span>
+        </button>
+        <button class="post-action" onclick="toggleReplies(${p.id})">
+          💬 ${p.replies.length} ${p.replies.length === 1 ? 'reply' : 'replies'}
+        </button>
+      </div>
+      <div class="replies" id="replies-${p.id}">
+        <div id="reply-list-${p.id}">${repliesHtml}</div>
+        <div class="reply-input-row">
+          <input type="text" id="reply-name-${p.id}" placeholder="Your name">
+          <input type="text" id="reply-text-${p.id}" placeholder="Add a reply..." onkeydown="if(event.key==='Enter')submitReply(${p.id})">
+          <button class="btn btn-primary" onclick="submitReply(${p.id})">Reply</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTeams() {
+  const list = document.getElementById('teamsList');
+  list.innerHTML = TEAMS.map(t => `
+    <div class="team-row">
+      <span class="team-dot-lg" style="background:${t.color}"></span>
+      <span class="team-row-name">${t.name}</span>
+      <span class="team-row-count">${t.posts} posts</span>
+    </div>
+  `).join('');
+}
+
+// ─── ACTIONS ────────────────────────────────────────────────────────
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function openVideo(id, title, team, views, time) {
+  document.getElementById('modalIframe').src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+  document.getElementById('modalTitle').textContent = decodeURIComponent(title);
+  document.getElementById('modalMeta').textContent = `${team} · ${views} views · ${time}`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modal')) closeModalBtn();
+}
+
+function closeModalBtn() {
+  document.getElementById('modal').classList.remove('open');
+  document.getElementById('modalIframe').src = '';
+}
+
+function filterVideos(type, btn) {
+  videoFilter = type;
+  document.querySelectorAll('#videoFilter .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderVideos();
+}
+
+function filterPosts(type, btn) {
+  currentFilter = type;
+  document.querySelectorAll('.filter-bar .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPosts();
+}
+
+function submitPost() {
+  const username = document.getElementById('postUsername').value.trim() || 'Anonymous';
+  const title = document.getElementById('postTitle').value.trim();
+  const body = document.getElementById('postBody').value.trim();
+  const flair = document.getElementById('postFlair').value;
+  if (!title || !body) { alert('Give your post a title and some content!'); return; }
+  posts.push({ id: nextPostId++, username, title, body, flair, likes: 0, liked: false, time: 'just now', replies: [] });
+  document.getElementById('postTitle').value = '';
+  document.getElementById('postBody').value = '';
+  currentFilter = 'all';
+  document.querySelectorAll('.filter-bar .filter-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+  renderPosts();
+}
+
+function likePost(id) {
+  const post = posts.find(p => p.id === id);
+  if (!post) return;
+  post.liked = !post.liked;
+  post.likes += post.liked ? 1 : -1;
+  const btn = document.querySelector(`#post-${id} .post-action`);
+  if (btn) btn.classList.toggle('liked', post.liked);
+  const span = document.getElementById(`likes-${id}`);
+  if (span) span.textContent = post.likes;
+}
+
+function toggleReplies(id) {
+  const el = document.getElementById(`replies-${id}`);
+  if (el) el.classList.toggle('open');
+}
+
+function submitReply(postId) {
+  const nameEl = document.getElementById(`reply-name-${postId}`);
+  const textEl = document.getElementById(`reply-text-${postId}`);
+  const username = nameEl.value.trim() || 'Anonymous';
+  const text = textEl.value.trim();
+  if (!text) return;
+  const post = posts.find(p => p.id === postId);
+  if (!post) return;
+  post.replies.push({ username, text, time: 'just now' });
+  textEl.value = '';
+  nameEl.value = '';
+  const ri = username.charCodeAt(0) % AVATAR_COLORS.length;
+  const list = document.getElementById(`reply-list-${postId}`);
+  const div = document.createElement('div');
+  div.className = 'reply';
+  div.innerHTML = `
+    <div class="avatar" style="background:${AVATAR_COLORS[ri]};width:26px;height:26px;font-size:0.72rem">${username[0].toUpperCase()}</div>
+    <div class="reply-content">
+      <div class="reply-author">${username} <span style="font-weight:300;color:var(--muted);font-size:0.72rem">just now</span></div>
+      <div class="reply-text">${text}</div>
+    </div>
+  `;
+  list.appendChild(div);
+  // update reply count button
+  const btns = document.querySelectorAll(`#post-${postId} .post-action`);
+  if (btns[1]) btns[1].innerHTML = `💬 ${post.replies.length} ${post.replies.length === 1 ? 'reply' : 'replies'}`;
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────
+renderVideos();
+renderPosts();
+renderTeams();
+</script>
+</body>
+</html>
